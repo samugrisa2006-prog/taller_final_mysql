@@ -1,5 +1,147 @@
 
 
+USE esports;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS USUARIO_EQUIPO;
+DROP TABLE IF EXISTS SESION_ENTRENAMIENTO;
+DROP TABLE IF EXISTS CONTROL;
+DROP TABLE IF EXISTS CONSOLA;
+DROP TABLE IF EXISTS LOGRO_TROFEO;
+DROP TABLE IF EXISTS EQUIPO_JUEGO;
+DROP TABLE IF EXISTS EQUIPO;
+DROP TABLE IF EXISTS JUEGO;
+DROP TABLE IF EXISTS PLATAFORMA;
+DROP TABLE IF EXISTS USUARIO;
+DROP TABLE IF EXISTS COMUNA_BARRIO;
+DROP TABLE IF EXISTS COMUNA;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+CREATE TABLE COMUNA (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE COMUNA_BARRIO (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  comuna_id INT NOT NULL,
+  nombre VARCHAR(100) NOT NULL,
+  FOREIGN KEY (comuna_id) REFERENCES COMUNA(id) ON DELETE CASCADE
+);
+
+CREATE TABLE USUARIO (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  tipo_documento VARCHAR(20),
+  numero_documento VARCHAR(50) UNIQUE,
+  primer_nombre VARCHAR(50) NOT NULL,
+  segundo_nombre VARCHAR(50),
+  primer_apellido VARCHAR(50) NOT NULL,
+  segundo_apellido VARCHAR(50),
+  edad INT,
+  sexo ENUM('M','F','O') DEFAULT 'O',
+  comuna_barrio_id INT,
+  direccion VARCHAR(200),
+  telefono_movil VARCHAR(30),
+  telefono_trabajo VARCHAR(30),
+  telefono_fijo VARCHAR(30),
+  redes_sociales VARCHAR(255),
+  tipo_usuario VARCHAR(50),
+  username VARCHAR(50),
+  password VARCHAR(255),
+  padre_familia VARCHAR(150),
+  FOREIGN KEY (comuna_barrio_id) REFERENCES COMUNA_BARRIO(id) ON DELETE SET NULL
+);
+
+CREATE TABLE PLATAFORMA (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  marca VARCHAR(100)
+);
+
+CREATE TABLE JUEGO (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(150) NOT NULL,
+  esrb VARCHAR(10),
+  estudio_desarrollador VARCHAR(150),
+  tipo_genero VARCHAR(50),
+  num_jugadores INT DEFAULT 1,
+  total_existencias INT DEFAULT 0,
+  plataforma_id INT,
+  FOREIGN KEY (plataforma_id) REFERENCES PLATAFORMA(id)
+);
+
+CREATE TABLE EQUIPO (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(150) NOT NULL,
+  horas_entrenamiento INT DEFAULT 0,
+  nivel_equipo VARCHAR(50),
+  trofeos_total INT DEFAULT 0
+);
+
+CREATE TABLE EQUIPO_JUEGO (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  equipo_id INT NOT NULL,
+  juego_id INT NOT NULL,
+  FOREIGN KEY (equipo_id) REFERENCES EQUIPO(id) ON DELETE CASCADE,
+  FOREIGN KEY (juego_id) REFERENCES JUEGO(id) ON DELETE CASCADE
+);
+
+CREATE TABLE LOGRO_TROFEO (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(150) NOT NULL,
+  puntos_requeridos INT NOT NULL,
+  juego_id INT NOT NULL,
+  FOREIGN KEY (juego_id) REFERENCES JUEGO(id) ON DELETE CASCADE
+);
+
+CREATE TABLE CONSOLA (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  numero_serie VARCHAR(100),
+  nombre VARCHAR(150),
+  total_existente INT DEFAULT 0,
+  direccion_ip VARCHAR(50),
+  mac_ethernet VARCHAR(50),
+  mac_wifi VARCHAR(50),
+  total_controles_disponibles INT DEFAULT 0,
+  plataforma_id INT,
+  FOREIGN KEY (plataforma_id) REFERENCES PLATAFORMA(id)
+);
+
+CREATE TABLE CONTROL (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  numero_serie VARCHAR(100),
+  plataforma_id INT,
+  tipo_control VARCHAR(80),
+  FOREIGN KEY (plataforma_id) REFERENCES PLATAFORMA(id)
+);
+
+CREATE TABLE SESION_ENTRENAMIENTO (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  fecha_agendamiento DATE NOT NULL,
+  hora_inicio TIME,
+  hora_fin TIME,
+  juego_id INT,
+  arbitro_usuario_id INT,
+  estado ENUM('AGENDADA','CANCELADA','CERRADA') DEFAULT 'AGENDADA',
+  equipo_id INT,
+  FOREIGN KEY (juego_id) REFERENCES JUEGO(id),
+  FOREIGN KEY (arbitro_usuario_id) REFERENCES USUARIO(id),
+  FOREIGN KEY (equipo_id) REFERENCES EQUIPO(id)
+);
+
+CREATE TABLE USUARIO_EQUIPO (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  equipo_id INT NOT NULL,
+  fecha_ingreso DATE,
+  rol_en_equipo VARCHAR(80),
+  FOREIGN KEY (usuario_id) REFERENCES USUARIO(id) ON DELETE CASCADE,
+  FOREIGN KEY (equipo_id) REFERENCES EQUIPO(id) ON DELETE CASCADE
+);
+
+
 INSERT INTO COMUNA (nombre) VALUES ('Comuna 1'), ('Comuna 2'), ('Comuna 3');
 
 INSERT INTO COMUNA_BARRIO (comuna_id, nombre) VALUES
@@ -75,3 +217,4 @@ INSERT INTO USUARIO_EQUIPO (usuario_id, equipo_id, fecha_ingreso, rol_en_equipo)
 (4,1,'2024-02-15','Jugador'),
 (2,1,'2023-11-05','Entrenador'),
 (6,3,'2024-06-20','Jugador');
+
